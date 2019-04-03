@@ -39,3 +39,7 @@ test_*.properties
 .sonar
 /coverage-report/
 /jacoco.out
+/.project
+/eclipselink-src.zip
+/plugins/
+/jpa/plugins/
