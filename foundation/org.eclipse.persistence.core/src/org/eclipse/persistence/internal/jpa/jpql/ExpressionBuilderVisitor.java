@@ -669,28 +669,22 @@ final class ExpressionBuilderVisitor implements EclipseLinkExpressionVisitor {
         List<Expression> expressions = new ArrayList<Expression>();
         List<Class<?>> types = new LinkedList<Class<?>>();
 
-        //cache the type of the expression so untyped children have a default type
-        Class<?> coalesceType = type[0];
 
         // Create the Expression for each scalar expression
         for (org.eclipse.persistence.jpa.jpql.parser.Expression child : expression.getExpression().children()) {
             child.accept(this);
             expressions.add(queryExpression);
+            types.add(type[0]);
 
-            //get the expression type parsed from the child expression
-            Class<?> childType = type[0];
-
-            // Default the type on an untyped ParameterExpression to the cached expression type.
-            // This is to help provide a valid type for null parameter when binding JDBC parameter types
+            // Set the type on an untyped ParameterExpression, so that 	            
+            // valid types can be passed for null parameter values in JDBC
             if (queryExpression.isParameterExpression()) {
                 ParameterExpression paramExpression = (ParameterExpression) queryExpression;
                 if (paramExpression.getType() == null || paramExpression.getType().equals(Object.class)) {
-                    paramExpression.setType(coalesceType);
-                    childType = coalesceType;
+                	paramExpression.setType(type[0]);
                 }
             }
 
-            types.add(childType);
         }
 
         // Create the COALESCE expression
