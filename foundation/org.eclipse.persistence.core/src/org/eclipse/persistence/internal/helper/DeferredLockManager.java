@@ -33,7 +33,7 @@ public class DeferredLockManager {
     protected int threadDepth;
     protected boolean isThreadComplete;
     
-    public static boolean SHOULD_USE_DEFERRED_LOCKS = true;
+    public static boolean SHOULD_USE_DEFERRED_LOCKS = Boolean.valueOf(System.getProperty("fish.payara.eclipselink.should-use-deferred-locks", "true"));
 
     /**
      * DeferredLockManager constructor comment.
