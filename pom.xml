@@ -22,7 +22,7 @@
     <description>Comprehensive and universal persistence framework for Java.</description>
     <groupId>org.eclipse.persistence</groupId>
     <artifactId>org.eclipse.persistence.parent</artifactId>
-    <version>3.1.0-SNAPSHOT</version>
+    <version>3.1.0-M1.payara-p1</version>
     <packaging>pom</packaging>
 
     <parent>
@@ -1779,5 +1779,30 @@
                 <module>jpa/eclipselink.jpa.oracle.test</module>
             </modules>
         </profile>
+        
+        <profile>
+            <id>payara-artifacts</id>
+            <distributionManagement>
+                <repository>
+                    <id>payara-artifacts</id>
+                    <name>Payara Artifacts</name>
+                    <url>https://nexus.payara.fish/repository/payara-artifacts</url>
+                </repository>
+            </distributionManagement>
+            <repositories>
+                <repository>
+                    <id>payara-artifacts</id>
+                    <name>Payara Artifacts</name>
+                    <url>https://nexus.payara.fish/repository/payara-artifacts</url>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>false</enabled>
+                    </snapshots>
+                </repository>
+            </repositories>
+        </profile>
+        
     </profiles>
 </project>
