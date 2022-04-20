@@ -14,28 +14,15 @@
 //     Oracle - initial API and implementation from Oracle TopLink
 package org.eclipse.persistence.testing.jaxb.xmlmarshaller;
 
-import java.io.*;
-
-import java.net.URL;
-
 import jakarta.xml.bind.JAXBContext;
-import jakarta.xml.bind.Marshaller;
-import jakarta.xml.bind.MarshalException;
-import jakarta.xml.bind.Unmarshaller;
 import jakarta.xml.bind.UnmarshalException;
-
 import jakarta.xml.bind.ValidationEventHandler;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.Source;
-import javax.xml.transform.stream.StreamSource;
-
-import org.w3c.dom.Node;
-
-import org.xml.sax.InputSource;
-
+import junit.framework.TestCase;
+import org.eclipse.persistence.jaxb.JAXBUnmarshaller;
 import org.eclipse.persistence.platform.xml.XMLPlatformException;
 
-import junit.framework.TestCase;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.InputStream;
 
 public class UnmarshallValidationTestCases extends TestCase {
 
@@ -46,7 +33,7 @@ public class UnmarshallValidationTestCases extends TestCase {
     static String SINGLE_FATAL_ERROR_XML = "org/eclipse/persistence/testing/oxm/jaxb/Employee_OneFatalError.xml";
 
     static boolean test1passed;
-    private Unmarshaller unmarshaller;
+    private JAXBUnmarshaller unmarshaller;
     private String contextPath;
     private ValidationEventHandler eventHandler;
 
@@ -58,7 +45,7 @@ public class UnmarshallValidationTestCases extends TestCase {
         contextPath = System.getProperty("jaxb.test.contextpath", JAXBSAXTestSuite.CONTEXT_PATH);
 
         JAXBContext context = JAXBContext.newInstance(contextPath);
-        unmarshaller = context.createUnmarshaller();
+        unmarshaller = (JAXBUnmarshaller) context.createUnmarshaller();
         if (!unmarshaller.isValidating()) {
             unmarshaller.setValidating(true);
         }
