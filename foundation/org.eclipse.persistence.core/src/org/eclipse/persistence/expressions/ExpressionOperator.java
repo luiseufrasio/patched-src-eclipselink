@@ -2380,16 +2380,18 @@ public class ExpressionOperator implements Serializable {
             dbStringIndex = 1;
         }
 
-        if (this.argumentIndices == null) {
-            this.argumentIndices = new int[items.size()];
-            for (int i = 0; i < this.argumentIndices.length; i++){
-                this.argumentIndices[i] = i;
+        int[] indices = this.argumentIndices; // work on local copy, cannot be broken by concurrent requets
+        if (indices == null) {
+            indices = new int[items.size()];
+            for (int i = 0; i < indices.length; i++) {
+                indices[i] = i;
             }
+            this.argumentIndices = indices;
         }
 
         String[] dbStrings = getDatabaseStrings(items.size());
-        for (int i = 0; i < this.argumentIndices.length; i++) {
-            final int index = this.argumentIndices[i];
+        for (int i = 0; i < indices.length; i++) {
+            final int index = indices[i];
             Expression item = items.get(index);
             if ((this.selector == Ref) || ((this.selector == Deref) && (item.isObjectExpression()))) {
                 DatabaseTable alias = ((ObjectExpression)item).aliasForTable(((ObjectExpression)item).getDescriptor().getTables().firstElement());
