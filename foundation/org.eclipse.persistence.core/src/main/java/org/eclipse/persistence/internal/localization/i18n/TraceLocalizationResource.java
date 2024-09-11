@@ -268,8 +268,11 @@ public class TraceLocalizationResource extends ListResourceBundle {
                 + " But our hacked implementation of the  isBuildObjectOnThreadComplete was not able to explain what thread and cache key are recursively "
                 + " stopping the candidate thread to make progress... We expect this code spot to never be invoked. "
                 + " Either this thread made progress or if it continues to be stuck in the releaseDeferredLock "
-                + " we most likely have an implementation bug somewhere. "},
-
+            + " we most likely have an implementation bug somewhere. "},
+        {"write_lock_manager_lockwait_exceeded_max_tries", "Max {0} tries exceeded during Write Lock Manager acquiring locks for clone."},
+        {"write_lock_manager_allow_interruption_lockwait_interrupted_throws", "Write Lock Manager was interrupted during acquiring locks for clone and 'eclipselink.concurrency.manager.allow.interruption.lockwait' was set to true, throwing ConcurrencyException"},
+        {"write_lock_manager_allow_interruption_lockwait_interrupted_continues", "Write Lock Manager was interrupted during acquiring locks for clone and 'eclipselink.concurrency.manager.allow.interruption.lockwait' was set to false, ignoring and continue"},
+        
         { "XML_call", "XML call" },
         { "XML_data_call", "XML data call" },
         { "XML_data_delete", "XML data delete" },
