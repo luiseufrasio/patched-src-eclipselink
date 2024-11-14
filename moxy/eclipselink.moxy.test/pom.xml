@@ -29,7 +29,7 @@
         <!-- CQ #21134, 21135, 21136, 21137 -->
         <exam.version>4.13.4</exam.version>
         <!-- CQ #3571 -->
-        <hibernate.version>6.1.0.Final</hibernate.version>
+        <hibernate.version>6.2.5.Final</hibernate.version>
         <jaxb.version>2.3.2</jaxb.version>
         <log4j.version>2.16.0</log4j.version>
         <!-- CQ #21139, 21140 -->

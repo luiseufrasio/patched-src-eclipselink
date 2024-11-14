@@ -22,7 +22,7 @@
 	<classpathentry kind="var" path="ECLIPSELINK_HOME/plugins/jaxb-osgi.jar" sourcepath="/ECLIPSELINK_HOME/plugins/jaxb-osgi.source.jar"/>
 	<classpathentry kind="var" path="ECLIPSELINK_HOME/plugins/jakarta.validation-api.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.eclipse.persistence.moxy.dynamicxjc"/>
-	<classpathentry kind="var" path="EXTENSION_LIB_EXTERNAL/hibernate-validator-5.1.0.Final.jar"/>
+	<classpathentry kind="var" path="EXTENSION_LIB_EXTERNAL/hibernate-validator-6.2.5.Final.jar"/>
 	<classpathentry kind="var" path="ECLIPSELINK_HOME/plugins/jakarta.json.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>

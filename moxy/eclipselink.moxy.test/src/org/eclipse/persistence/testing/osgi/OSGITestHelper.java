@@ -66,7 +66,7 @@ public class OSGITestHelper {
 
     public static Option[] getOptionsWithBeanValidation() {
         return options(
-                mavenBundle().groupId("org.hibernate.validator").artifactId("hibernate-validator").version("6.0.7.Final"),
+                mavenBundle().groupId("org.hibernate.validator").artifactId("hibernate-validator").version("6.2.5.Final"),
                 mavenBundle().groupId("com.fasterxml").artifactId("classmate").version("1.5.1"),
                 mavenBundle().groupId("org.glassfish").artifactId("javax.el").version("3.0.1-b08"),
                 mavenBundle().groupId("org.jboss.logging").artifactId("jboss-logging").version("3.4.1.Final"),
