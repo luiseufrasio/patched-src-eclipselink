@@ -47,7 +47,7 @@ if no customized descriptor is provided in `src/main/resources-ejb/META-INF/pers
     <parent>
         <artifactId>org.eclipse.persistence.jpa.testapps</artifactId>
         <groupId>org.eclipse.persistence</groupId>
-        <version>5.0.0.payara-p1</version>
+        <version>5.0.0.payara-p2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
