@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 1998, 2025 Oracle and/or its affiliates. All rights reserved.
  * Copyright (c) 1998, 2024 IBM Corporation. All rights reserved.
+ * Copyright (c) 2026 Payara Foundation and/or its affiliates.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -38,6 +39,8 @@ import org.eclipse.persistence.logging.SessionLog;
 import org.eclipse.persistence.mappings.DatabaseMapping;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -674,6 +677,9 @@ public class WriteLockManager {
      *            cache
      */
     public static void clearMapThreadToObjectIdsWithChagenSet(Thread thread) {
+        if (thread == null) {
+            return;
+        }
         MAP_WRITE_LOCK_MANAGER_THREAD_TO_OBJECT_IDS_WITH_CHANGE_SET.remove(thread);
     }
     /**
@@ -689,6 +695,9 @@ public class WriteLockManager {
      */
     public static void populateMapThreadToObjectIdsWithChagenSet(Thread thread,
                                                                  Collection<ObjectChangeSet> objectChangeSets) {
+        if (thread == null) {
+            return;
+        }
         // (a) make sure the map has an entry for the the thread
         boolean hasKey = MAP_WRITE_LOCK_MANAGER_THREAD_TO_OBJECT_IDS_WITH_CHANGE_SET.containsKey(thread);
         if (!hasKey) {
@@ -701,6 +710,9 @@ public class WriteLockManager {
         primarykeys.clear();
         for (ObjectChangeSet objectChangeSet : objectChangeSets) {
             Object primaryKey = objectChangeSet.getId();
+            if (primaryKey == null) {
+                continue;
+            }
             primarykeys.add(primaryKey);
         }
     }
@@ -713,6 +725,9 @@ public class WriteLockManager {
      *            the thread that what clear his set of cache keys it is struggling to acquire.
      */
     public static void clearMapWriteLockManagerToCacheKeysThatCouldNotBeAcquired(Thread thread) {
+        if (thread == null) {
+            return;
+        }
         THREAD_TO_FAIL_TO_ACQUIRE_CACHE_KEYS.remove(thread);
     }
 
@@ -789,6 +804,9 @@ public class WriteLockManager {
      * @return the set of cache keys the thrad is struggling to acquire
      */
     private static Set<ConcurrencyManager> getCacheKeysThatCouldNotBeAcquiredByThread(Thread thread) {
+        if (thread == null) {
+            return Collections.emptySet();
+        }
         // (a) make sure the map has an entry for the the thread
         boolean hasKey = THREAD_TO_FAIL_TO_ACQUIRE_CACHE_KEYS.containsKey(thread);
         if (!hasKey) {
