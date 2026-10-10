@@ -193,7 +193,12 @@ public class CacheDeadLockManagersTest extends JUnitTestCase {
             final Throwable[] cloneFailure = new Throwable[1];
             Thread waiter = new Thread(() -> {
                 try {
-                    new WriteLockManager().acquireLocksForClone(result, descriptor, cacheKey, serverSession);
+                    Map<?, ?> lockedObjects = new WriteLockManager().acquireLocksForClone(result, descriptor, cacheKey, serverSession);
+                    // Release the read locks acquired for the clone so they do not leak into the shared
+                    // session; must happen on this thread, as the ReadLockManager is per thread.
+                    for (Object lockedCacheKey : lockedObjects.values()) {
+                        ((CacheKey) lockedCacheKey).releaseReadLock();
+                    }
                 } catch (Throwable t) {
                     cloneFailure[0] = t;
                 } finally {
@@ -203,8 +208,17 @@ public class CacheDeadLockManagersTest extends JUnitTestCase {
             waiter.setDaemon(true);
             waiter.start();
 
-            // Give the waiter time to reach the wait, then let the holder release the lock.
-            Thread.sleep(500);
+            // Only release the lock once the waiter is actually parked inside acquireLocksForClone;
+            // releasing earlier would let it read-lock the key without waiting and the test would pass
+            // even with the lost wakeup bug.
+            long deadline = System.currentTimeMillis() + 10000;
+            Thread.State waiterState = waiter.getState();
+            while (waiterState != Thread.State.WAITING && waiterState != Thread.State.TIMED_WAITING) {
+                assertTrue("Clone waiter did not start waiting for the held cache key (state " + waiterState + ")",
+                        waiter.isAlive() && System.currentTimeMillis() < deadline);
+                Thread.sleep(10);
+                waiterState = waiter.getState();
+            }
             release.release();
 
             // With the fix the waiter is signalled and returns well within this window. Without the fix
@@ -214,6 +228,7 @@ public class CacheDeadLockManagersTest extends JUnitTestCase {
             if (cloneFailure[0] != null) {
                 throw new AssertionError("acquireLocksForClone failed unexpectedly", cloneFailure[0]);
             }
+            assertEquals("Read locks acquired for the clone were not released", 0, cacheKey.getNumberOfReaders());
         } finally {
             if (em.isOpen()) {
                 em.close();
