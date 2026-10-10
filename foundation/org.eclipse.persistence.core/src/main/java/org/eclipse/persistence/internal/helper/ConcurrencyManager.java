@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 1998, 2025 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2026 Payara Foundation and/or its affiliates.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -425,6 +426,9 @@ public class ConcurrencyManager implements Serializable {
      * Return the deferred lock manager from the thread
      */
     public static DeferredLockManager getDeferredLockManager(Thread thread) {
+        if (thread == null) {
+            return null;
+        }
         return getDeferredLockManagers().get(thread);
     }
 
