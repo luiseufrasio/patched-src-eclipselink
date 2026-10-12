@@ -14,6 +14,7 @@ Where command is:
    install          To install compilation result to your maven repo (RELEASE version)
    snapshot-install To install a SNAPSHOT version to your local maven repo (adds -SNAPSHOT suffix, skips signing)
    snapshot         To deploy a SNAPSHOT version to the remote Nexus snapshot repository (requires Nexus credentials in settings.xml; set MAVEN_SETTINGS to override location)
+   upload           To deploy a RELEASE version to the remote Nexus payara-artifacts repository (requires Nexus credentials in settings.xml; set MAVEN_SETTINGS to override location)
    deploy           To deploy the compilation result into patched projects repo
 
 The tool will determine the correct version automatically no furger arguments are needed (or implemented)
@@ -279,8 +280,83 @@ prepare() {
    tar -x -z -C $HOME/extension.lib.external -f $HOME/extension.lib.external/apache-maven-3.6.0-bin.tar.gz
 }
 
+# Deploys a RELEASE version to the remote Nexus payara-artifacts repository.
+# Produces version: ${release.version}.payara-p${PATCH_VERSION}
+# e.g. 2.7.16.payara-p2
+#
+# Replaces the original ant -f uploadToNexus.xml call because:
+#   1. uploadToNexus.xml hardcoded build.type=RELEASE, so is.snapshot.build was never
+#      set and no deploy targets ran.
+#   2. maven-ant-tasks-2.1.3 (used by uploadToNexus.xml for typedef) is incompatible
+#      with Ant 1.10+ / Java 11+, causing "Target 'from' does not exist" errors.
+#   3. The staging targets in uploadToNexus.xml use gpg:sign-and-deploy-file with
+#      -Poss-release, which is designed for Maven Central, not an internal Nexus repo.
+#   This function calls 'mvn deploy:deploy-file' directly without GPG signing,
+#   which is appropriate for an internal Nexus repository.
+#
+# Prerequisites:
+#   ~/.m2/settings.xml must contain a <server> entry with id "payara-artifacts"
+#   and valid Nexus credentials.
 upload() {
-   ant -f uploadToNexus.xml -Dmavenant.dir=target/ -Drelease.version=${VERSION} -Dbuild.type=RELEASE -Dgit.hash=`git rev-parse --short HEAD` -Dversion.string=${VERSION} -Dmaven.repo.dir=$HOME/.m2/repository -Dmaven.repo.url=https://nexus.dev.payara.fish/repository/payara-artifacts -DstagingId=payara-artifacts -DstagingURL=https://nexus.dev.payara.fish/repository/payara-artifacts -Dasm.version=${VERSION}
+   local MVN_VERSION="${VERSION}"
+   local PLUGINS_DIR="$PWD/plugins"
+   local GROUP="org.eclipse.persistence"
+   local NEXUS_URL="https://nexus.dev.payara.fish/repository/payara-artifacts"
+   local NEXUS_ID="payara-artifacts"
+
+   echo "Deploying EclipseLink ${MVN_VERSION} to Nexus payara-artifacts repository..."
+   echo "  URL: ${NEXUS_URL}"
+   echo "  Credentials: repositoryId '${NEXUS_ID}' from ~/.m2/settings.xml"
+   echo ""
+
+   local DEPLOYED=0
+   local FAILED=0
+
+   for JAR in "${PLUGINS_DIR}"/*_${VERSION}.jar; do
+      [[ -f "$JAR" ]] || continue
+      local BASENAME
+      BASENAME=$(basename "$JAR")
+      local ART="${BASENAME%_${VERSION}.jar}"
+      [[ "$ART" == *.source ]] && continue
+
+      local SRC="${PLUGINS_DIR}/${ART}.source_${VERSION}.jar"
+
+      echo "  [deploy] ${GROUP}:${ART}:${MVN_VERSION}"
+      $MVN deploy:deploy-file \
+         -Dfile="$JAR" \
+         -DgroupId="$GROUP" \
+         -DartifactId="$ART" \
+         -Dversion="$MVN_VERSION" \
+         -Dpackaging=jar \
+         -DgeneratePom=true \
+         -Durl="$NEXUS_URL" \
+         -DrepositoryId="$NEXUS_ID" \
+         -q && DEPLOYED=$((DEPLOYED + 1)) || FAILED=$((FAILED + 1))
+
+      if [[ -f "$SRC" ]]; then
+         $MVN deploy:deploy-file \
+            -Dfile="$SRC" \
+            -DgroupId="$GROUP" \
+            -DartifactId="$ART" \
+            -Dversion="$MVN_VERSION" \
+            -Dpackaging=jar \
+            -Dclassifier=sources \
+            -DgeneratePom=false \
+            -Durl="$NEXUS_URL" \
+            -DrepositoryId="$NEXUS_ID" \
+            -q
+      fi
+   done
+
+   # Deploy special-case artifacts not covered by the generic loop
+   publish_special_artifacts \
+      "deploy:deploy-file -Durl=${NEXUS_URL} -DrepositoryId=${NEXUS_ID}" \
+      "$PLUGINS_DIR" \
+      "$MVN_VERSION"
+
+   echo ""
+   echo "Done. Deployed ${DEPLOYED} artifact(s) as ${MVN_VERSION} to Nexus (${FAILED} failed)."
+   [[ $FAILED -gt 0 ]] && echo "  Tip: verify your settings.xml (${MAVEN_SETTINGS:-~/.m2/settings.xml}) has a <server id=\"${NEXUS_ID}\"> with valid credentials. Set MAVEN_SETTINGS to point at a custom settings file."
 }
 
 # Deploys a SNAPSHOT version to the remote Nexus snapshot repository.
